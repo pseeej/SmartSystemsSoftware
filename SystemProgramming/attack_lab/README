@@ -1,0 +1,38 @@
+
+Problem: level1, level2 
+http://csapp.cs.cmu.edu/3e/attacklab.pdf
+
+## Try to run ctarget 
+./ctarget -q   // This will work.
+
+##########################
+## solve the problem 1. ##
+##########################
+vi ans1.txt
+./hex2raw < ans1.txt > ans1.raw
+./ctarget -q -i ans1.raw 
+
+You will see the following message if you succeed. 
+
+Cookie: 0x47db4e3a
+Touch1!: You called touch1()
+Valid solution for level 1 with target ctarget
+PASS: Would have posted the following:
+
+
+
+##########################
+## solve the problem 2. ##
+##########################
+vi ans2.txt
+./hex2raw < ans2.txt > ans2.raw
+./ctarget -q -i ans2.raw 
+
+You will see the following message if you succeed. 
+
+./ctarget -q -i ans2.raw
+Cookie: 0x47db4e3a
+Touch2!: You called touch2(0x47db4e3a)
+Valid solution for level 2 with target ctarget
+PASS: Would have posted the following:
+
