@@ -158,6 +158,9 @@ while True:
         top = 0
         left = iScreenDw + iScreenDx//2 - 2
         newBlockNeeded = False
+
+        arrayBlk = arrayBlks[random.randrange(0, 7)]
+
         currBlk = Matrix(arrayBlk)
         tempBlk = iScreen.clip(top, left, top+currBlk.get_dy(), left+currBlk.get_dx())
         tempBlk = tempBlk + currBlk
@@ -168,8 +171,6 @@ while True:
         oScreen = Matrix(iScreen)
         oScreen.paste(tempBlk, top, left)
         draw_matrix(oScreen); print()
-
-        arrayBlk = arrayBlks[random.randrange(0, 7)]
         
 ###
 ### end of the loop
