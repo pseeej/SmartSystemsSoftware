@@ -1,2 +1,0 @@
-std_msgs/Float32 float_data
-std_msgs/String string_data
