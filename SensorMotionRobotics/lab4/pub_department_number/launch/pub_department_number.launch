@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="pub_department_number" name="pub_department_number" type="pub_department_number" output="screen"> </node>
+</launch>

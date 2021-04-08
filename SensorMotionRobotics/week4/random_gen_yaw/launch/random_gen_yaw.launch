@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="random_gen_yaw" name="random_gen_yaw" type="random_gen_yaw" output="screen"> </node>
+</launch>

@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="random_gen_y" name="random_gen_y" type="random_gen_y" output="screen"> </node>
+</launch>

@@ -1,0 +1,8 @@
+<launch>
+
+    <rosparam command="load" file="$(find my_publisher_class)/cfg/my_parameter.yaml"/>
+
+    <node pkg="my_publisher_class" name="my_publisher_class" type="my_publisher_class" output="screen"> 
+        
+    </node>
+</launch>
