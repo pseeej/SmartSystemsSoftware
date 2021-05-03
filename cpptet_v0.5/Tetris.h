@@ -1,38 +1,29 @@
 #pragma once
 #include "Matrix.h"
 
-#define color_black "\033[37m"
-#define color_red "\033[31m"
-#define color_green "\033[32m"
-#define color_yellow "\033[33m"
-#define color_blue "\033[34m"
-#define color_purple "\033[35m"
-#define color_cyan "\033[36m"
-#define color_pink "\033[95m"
-
 enum TetrisState { Running, NewBlock, Finished };
 
 class Tetris {
-private:
+public:
     TetrisState state;
     int justStarted;
-    int nBlockTypes = 0;
-    int nBlockDegrees = 0;
+    static int nBlockTypes;
+    static int nBlockDegrees;
     int idxBlockDegree;
     int idxBlockColor;
     int idxBlockType;
 
-    char* ColorLists[8];
-    int** setOfBlockArrays;
-    int** setOfBlockObjects;
+    //char* ColorLists[8];
+    //static Matrix setOfBlockArrays;
+    static Matrix** setOfBlockObjects;
 
-    Matrix iScreen;
-    Matrix oScreen;
-    int iScreenDw = 0;  // largest enough to cover the largest block
+    Matrix* iScreen;
+    Matrix* oScreen;
+    static int iScreenDw;  // largest enough to cover the largest block
     int iScreenDx;
     int iScreenDy;
 
-    Matrix arrayScreen;
+    int* arrayScreen;
     int arrayScreenDx;
     int arrayScreenDy;
 
@@ -41,15 +32,14 @@ private:
 
     int top;
     int left;
-public:
-    Tetris();
+//public:
+    Tetris(int dy, int dx);
     ~Tetris();
-    Matrix createArrayScreen();
+    int* createArrayScreen();
+    void init(int **setOfBlockArrays, int nBlockTypes, int nBlockDegrees);
 
     // argument Matrix *matrix deleted;
     TetrisState accept(char key);
     void deleteFullLines();
 
-    void initSetOfBlockArrays();
-    void initColorLists();
 };
