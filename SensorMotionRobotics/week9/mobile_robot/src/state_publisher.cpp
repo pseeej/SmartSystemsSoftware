@@ -24,14 +24,14 @@ namespace state_publisher{
         nh.getParam("joint2", temp3);
         nh.getParam("joint2", temp4);
 
-        joint_state.name.push_back("joint1");
-        joint_state.position.push_back(temp1);
-        joint_state.name.push_back("joint2");
-        joint_state.position.push_back(temp2);
-        joint_state.name.push_back("joint3");
-        joint_state.position.push_back(temp3);
-        joint_state.name.push_back("joint4");
-        joint_state.position.push_back(temp4);
+        joint_state_.name.push_back("joint1");
+        joint_state_.position.push_back(temp1);
+        joint_state_.name.push_back("joint2");
+        joint_state_.position.push_back(temp2);
+        joint_state_.name.push_back("joint3");
+        joint_state_.position.push_back(temp3);
+        joint_state_.name.push_back("joint4");
+        joint_state_.position.push_back(temp4);
 
 
         joint_pub_.publish(joint_state_);
