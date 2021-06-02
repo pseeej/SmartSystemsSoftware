@@ -60,7 +60,7 @@ def initSetOfBlockArrays():
             setOfBlockArrays[idxBlockType][idxBlockDegree] = temp_array
 
     return setOfBlockArrays
-    
+	
 def processKey(window, board, key):
 	global nBlocks 
 

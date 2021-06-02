@@ -1,11 +1,135 @@
-##############################################################
-### Threading code (Observer pattern)
-##############################################################
-from abc import *
+from tetris import *
+from random import *
+
+import os
+import sys
+import tty
+import termios
 
 import threading
 import time
 import curses
+
+##############################################################
+### Data model related code
+##############################################################
+def rotate(m_array):
+    size = len(m_array)
+    r_array = [[0] * size for _ in range(size)]
+
+    for y in range(size):
+        for x in range(size):
+            r_array[x][size-1-y] = m_array[y][x]
+
+    return r_array
+
+def initSetOfBlockArrays():
+    global nBlocks
+
+    arrayBlks = [ [ [ 0, 0, 1, 0 ],     # I shape
+                    [ 0, 0, 1, 0 ],     
+                    [ 0, 0, 1, 0 ],     
+                    [ 0, 0, 1, 0 ] ],   
+                  [ [1, 0, 0],          # J shape
+                    [1, 1, 1],          
+                    [0, 0, 0] ],
+                  [ [0, 0, 1],          # L shape
+                    [1, 1, 1],          
+                    [0, 0, 0] ],        
+                  [ [1, 1],             # O shape
+                    [1, 1] ],           
+                  [ [0, 1, 1],          # S shape
+                    [1, 1, 0],          
+                    [0, 0, 0] ],
+                  [ [0, 1, 0],          # T shape    
+                    [1, 1, 1],          
+                    [0, 0, 0] ],
+                  [ [1, 1, 0],          # Z shape
+                    [0, 1, 1],          
+                    [0, 0, 0] ]         
+                ]
+
+    nBlocks = len(arrayBlks)
+    setOfBlockArrays = [[0] * 4 for _ in range(nBlocks)]
+
+    for idxBlockType in range(nBlocks):
+        temp_array = arrayBlks[idxBlockType]
+        setOfBlockArrays[idxBlockType][0] = temp_array
+        for idxBlockDegree in range(1,4):
+            temp_array = rotate(temp_array)
+            setOfBlockArrays[idxBlockType][idxBlockDegree] = temp_array
+
+    return setOfBlockArrays
+    
+def processKey(window, board, key):
+	global nBlocks 
+
+	state = board.accept(key)
+	printWindow(window, board.getScreen())
+          
+	if state != TetrisState.NewBlock:
+		return state
+
+	idxBlockType = randint(0, nBlocks-1)
+	key = str(idxBlockType)
+	state = board.accept(key)
+	printWindow(window, board.getScreen())
+
+	if state != TetrisState.Finished:
+		return state
+
+	return state
+
+##############################################################
+### UI code
+##############################################################
+def printMsg(msg):
+	window = win0
+
+	window.clear()
+	window.addstr(0, 0, msg)
+
+	lock.acquire()
+	window.refresh()
+	lock.release()
+	return
+
+def arrayToString(array):
+	line = ''
+	for x in array:
+		if x == 0:
+			line += '□'
+		elif x == 1:
+			line += '■'
+		else:
+			line += 'XX'
+
+	return line
+
+def printWindow(window, screen):
+	array = screen.get_array()
+	window.clear()
+
+	for y in range(screen.get_dy()-Tetris.iScreenDw):
+		line = arrayToString(array[y][Tetris.iScreenDw:-Tetris.iScreenDw])
+		window.addstr(y, 0, line)
+
+	lock.acquire()
+	window.refresh()
+	lock.release()
+	return
+
+
+def getChar():
+	ch = sys.stdin.read(1)
+	return ch
+
+
+
+##############################################################
+### Threading code (Observer pattern)
+##############################################################
+from abc import *
 
 isGameDone = False
 
@@ -124,28 +248,34 @@ class Model(threading.Thread, Observer, Publisher):
 	def run(self):
 		global isGameDone
 
-		# setOfBlockArrays = initSetOfBlockArrays()
+		setOfBlockArrays = initSetOfBlockArrays()
 
-		# Tetris.init(setOfBlockArrays)
-		# board = Tetris(20, 15)
+		Tetris.init(setOfBlockArrays)
+		board = Tetris(20, 15)
 
-		# idxBlockType = randint(0, nBlocks-1)
-		# key = str(idxBlockType)
-		# state = board.accept(key)
+		idxBlockType = randint(0, nBlocks-1)
+		key = str(idxBlockType)
+		state = board.accept(key)
 		# printWindow(self.window, board.getScreen())
 
 		while not isGameDone:
 			key = self.read()
+			self.update(key)
 			if key == '':
 				break
 			if key not in self.keypad:
 				continue
 
 			key = self.keypad[key]
+
 			if key == 'q':
 				state = TetrisState.Finished
 			else:
-				state = processKey(self.window, board, key)
+				state = board.accept(key)
+				if state == TetrisState.NewBlock:
+					idxBlockType = randint(0, nBlocks-1)
+					key = str(idxBlockType)
+					state = board.accept(key)
 
 			if state == TetrisState.Finished:
 				isGameDone = True
@@ -153,14 +283,14 @@ class Model(threading.Thread, Observer, Publisher):
 				time.sleep(2)
 				break
 
-		printMsg('%s terminated... Press any key to continue' % self.name)
+		printMsg('%s / %s terminated... Press any key to continue' % (key, self.name))
 		time.sleep(1)
-		self.notifyObservers('')	# 이거 추가해줬음
+		# self.notifyObservers('')	# 이거 추가해줬음
 		return
 
 class View(threading.Thread, Observer):
 	def __init__(self, *args, **kwargs):
-		super(Model, self).__init__(*args[1:], **kwargs)
+		super(View, self).__init__(*args[1:], **kwargs)
 		self.name = args[0]
 		self.queue = list()
 		self.cv = threading.Condition()
@@ -168,6 +298,13 @@ class View(threading.Thread, Observer):
     
 	def addWindow(self, window):	# Model에서 뽀려옴
 		self.window = window
+		return
+
+	def update(self, key):
+		self.cv.acquire()
+		self.queue.append(key)
+		self.cv.notify()
+		self.cv.release()
 		return
 
 	def read(self):
@@ -192,17 +329,27 @@ class View(threading.Thread, Observer):
 		printWindow(self.window, board.getScreen())
 
 		while not isGameDone:
-			key = self.read()
-			if key == '':
-				break
-			if key not in self.keypad:
-				continue
+			# 	key = self.read()
+			# 	if key == '':
+			# 		break
+			# 	if key not in self.keypad:
+			# 		continue
 
-			key = self.keypad[key]
+			key = self.read()
+
+			#state = processKey(self.window, board, key)
 			if key == 'q':
 				state = TetrisState.Finished
 			else:
 				state = processKey(self.window, board, key)
+				# state = board.accept(key)
+				# printWindow(self.window, board.getScreen())
+
+				# if state == TetirsState.NewBlock:
+				# 	idxBlockType = randint(0, nBlocks-1)
+				# 	key = str(idxBlockType)
+				# 	state = board.accept(key)
+				# 	printWindow(self.window, board.getScreen())
 
 			if state == TetrisState.Finished:
 				isGameDone = True
@@ -210,7 +357,7 @@ class View(threading.Thread, Observer):
 				time.sleep(2)
 				break
 
-		printMsg('%s terminated... Press any key to continue' % self.name)
+		printMsg('%s / %s terminated... Press any key to continue' % (key, self.name))
 		time.sleep(1)
 		return
 
