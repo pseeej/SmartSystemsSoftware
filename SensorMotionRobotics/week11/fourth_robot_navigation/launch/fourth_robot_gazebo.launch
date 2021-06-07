@@ -1,0 +1,48 @@
+<!-- roslaunch fourth_robot_navigation fourth_robot_gazebo.launch 로 수행 -->
+<!-- gazebo에 로봇과 장애물 나옴 -->
+<!-- rosrun teleop_twist_keyboard teleop_twist_keyboard.py /cmd_vel:=/diff_drive_controller/cmd_vel (gazebo 상에서 받는 cmd_vel topic의 이름이 diff_drive) -->
+<!-- 위에 거 통해 gazebo 상의 로봇 움직이면 rviz 상의 로봇이 움직이는 것 확인 가능 -->
+<!-- rqt_graph -->
+
+<!-- rviz 통해 odometry, laser, tf 확인 -->
+<!-- roslaunch fourth_robot_navigation fourth_robot_gazebo.launch / rviz-->
+<!-- rviz setting은 LaserScan의 topic은 /frontscan, point size : 0.1
+                    LaserScan          /rear/scan, point size : 0.1
+                    Odometry            /diff_drive_controller/odom, covariance 체크 해제
+                    RobotModel 추가-->
+<!-- rqt_tf_tree -->
+
+<launch>
+
+    <!-- These are the arguments you can pass this launch file, for example paused:=true -->
+    <arg name="model" default="$(find fourth_robot_description)/robots/fourth_robot.urdf.xacro"/>
+    <arg name="paused" default="false"/>
+    <arg name="use_sim_time" default="true"/>
+    <arg name="gui" default="true"/>
+    <arg name="headless" default="false"/>
+    <arg name="debug" default="false"/>
+
+    <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(find fourth_robot_gazebo)/worlds/clearpath_playpen.world"/>
+        <arg name="debug" value="$(arg debug)"/>
+        <arg name="gui" value="$(arg gui)"/>
+        <arg name="paused" value="$(arg paused)"/>
+        <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+        <arg name="headless" value="$(arg headless)"/>
+    </include>
+
+    <!-- lrf merger -->
+    <include file="$(find fourth_robot_bringup)/launch/sensors/lrf_merger.launch"/>
+    
+    <!-- Load the URDF into the ROS parameter server -->
+    <param name="robot_description"
+            command = "$(find xacro)/xacro.py '$(arg model)'"/>
+
+    <!-- Run a python script to the send a service call to gazebo_ros to spawn a URDF robot -->
+    <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+        args="-urdf -model fourth_robot -param robot_description"/>
+
+    <!-- ros control motoman launch file-->
+    <include file="$(find fourth_robot_control)/launch/fourth_robot_control.launch"/>
+</launch>
