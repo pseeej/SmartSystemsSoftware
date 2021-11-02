@@ -1,5 +1,5 @@
 # 2021-2 OSS in AIX
-AI융합학부 20180368 **박세진([@pseeej](https://github.com/pseeeej))**
+AI융합학부 20180368 박세진([@pseeej](https://github.com/pseeeej))
 
 
 ## 폴더 구성
