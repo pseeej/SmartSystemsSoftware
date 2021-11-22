@@ -8,11 +8,13 @@ def morning(mafnum, citnum):
     else:
         citnum -= 1
         print("시민이 죽었습니다.")
-    
+
+    print(f"<< 현재 인원 마피아 {mafia}명, 시민{citnum}명 >>")
     return (mafnum, citnum)
 
 def evening(mafia, citnum):
     print("시민이 죽었습니다.")
+    print(f"<< 현재 인원 마피아 {mafia}명, 시민{citnum-1}명 >>")
     return (mafia, citnum-1)
 
 def checkIfEnd(mafnum, citnum):
@@ -32,13 +34,16 @@ def checkIfEnd(mafnum, citnum):
 
 mafia = int(input("마피아 수를 입력하시오. "))
 citizen = int(input("시민의 수를 입력하시오. "))
-print()
 
-day = 1
+day = 0
 
 while True:
     if checkIfEnd(mafia, citizen):
         break
+
+    print("============================")
+    
+    day += 1
 
     print(f"{day}번째 낮입니다.")
     (mafia, citizen) = morning(mafia, citizen)
@@ -51,9 +56,5 @@ while True:
     (mafia, citizen) = evening(mafia, citizen)
     if checkIfEnd(mafia, citizen):
         break
-
-    day += 1
-
-    print("============================")
 
     
