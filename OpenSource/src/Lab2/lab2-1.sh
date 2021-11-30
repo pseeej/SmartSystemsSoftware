@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/bin/sh
 
-number=1
+a=0
 
-while [ $number -le $1 ]
+while [ $a -lt $1 ]
 do
-    echo "hello world"
-    ((number++))
+   echo Hello, World
+   a=`expr $a + 1`
 done
